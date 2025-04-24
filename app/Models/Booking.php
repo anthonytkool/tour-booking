@@ -18,4 +18,12 @@ class Booking extends Model
         'customer_phone',
         'payment_status',
     ];
+
+    /**
+     * ความสัมพันธ์ Booking → Tour
+     */
+    public function tour()
+    {
+        return $this->belongsTo(\App\Models\Tour::class);
+    }
 }
