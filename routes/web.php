@@ -10,7 +10,9 @@ Route::get('/', function () {
 });
 Route::get('/tours', [TourController::class, 'index']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
-
+Route::get('/', [TourController::class, 'index'])->name('tours.index');
+Route::get('/tours/{id}', [TourController::class, 'show'])->name('tours.show');
+Route::get('/tours', [TourController::class, 'index'])->name('tours.index');
 // พื้นที่ที่ต้องล็อกอินก่อน
 Route::middleware('auth')->group(function () {
 
