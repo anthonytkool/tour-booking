@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\BookingController;
@@ -14,6 +13,17 @@ Route::get('/tours/{id}', [TourController::class, 'show']);
 
 // พื้นที่ที่ต้องล็อกอินก่อน
 Route::middleware('auth')->group(function () {
+
+     // Dashboard
+    Route::get('/dashboard', function () {
+     return view('dashboard');
+ })->name('dashboard');
+
+ // Stub Profile edit (ป้องกัน error)
+ Route::get('/profile', function () {
+     return view('profile.edit');  // คุณสามารถสร้างไฟล์ view นี้ตามต้องการ
+ })->name('profile.edit');
+
     // ฟอร์มจอง & บันทึกการจอง
     Route::get('/booking/{id}',  [BookingController::class, 'create'])
          ->name('booking.create');
