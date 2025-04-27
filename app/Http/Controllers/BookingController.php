@@ -1,62 +1,46 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Tour;
 use App\Models\Booking;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;        // ← เพิ่มบรรทัดนี้
-use App\Mail\BookingConfirmationMail;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    public function create($id)
+    public function create(Tour $tour)
     {
-        $tour = Tour::findOrFail($id);
-        return view('booking', compact('tour'));
+        return view('booking.form', compact('tour'));
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request, Tour $tour)
     {
-        $data = $request->validate([
-            'travel_date'       => 'required|date',
-            'number_of_people'  => 'required|integer|min:1',
-            'customer_name'     => 'required|string',
-            'customer_phone'    => 'required|string',
-            'customer_email'    => 'required|email',
+        // Validate ข้อมูลที่รับมา
+        $request->validate([
+            'travel_date' => 'required|date',
+            'number_of_people' => 'required|integer|min:1',
         ]);
 
-        try {
-            $booking = Booking::create([
-                'tour_id'           => $id,
-                'travel_date'       => $data['travel_date'],
-                'number_of_people'  => $data['number_of_people'],
-                'customer_name'     => $data['customer_name'],
-                'customer_phone'    => $data['customer_phone'],
-                'customer_email'    => $data['customer_email'],
-                'payment_status'    => 'pending',
-            ]);
+        // สร้าง Booking ใหม่
+        $booking = new Booking();
+        $booking->user_id = Auth::id();
+        $booking->tour_id = $tour->id;
+        $booking->travel_date = $request->input('travel_date');
+        $booking->number_of_people = $request->input('number_of_people');
+        $booking->status = 'pending'; // สถานะเริ่มต้น "รอยืนยัน" หรือจะเปลี่ยนตามที่ต้องการได้
+        $booking->save();
 
-            // ส่งอีเมลยืนยัน
-            
-
-          // แทนส่งอีเมล ให้ไปหน้าชำระเงิน
-return redirect()->route('payment.checkout', ['id' => $booking->id]);
-
-        } catch (\Exception $e) {
-            Log::error("Booking error: " . $e->getMessage());   // ← เรียกใช้ Log facade ได้เลย
-            return redirect()->route('booking.error', ['id' => $id])
-                ->with('error_message', 'เกิดข้อผิดพลาด ไม่สามารถจองได้ กรุณาลองใหม่');
-        }
+        return redirect()->route('booking.success', ['id' => $booking->id]);
     }
 
     public function success($id)
     {
-        return view('booking-success');
+        return view('booking.success', ['booking_id' => $id]);
     }
 
     public function error($id)
     {
-        return view('booking-error');
+        return view('booking.error', ['booking_id' => $id]);
     }
 }

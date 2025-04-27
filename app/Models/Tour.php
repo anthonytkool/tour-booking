@@ -14,4 +14,9 @@ class Tour extends Model
         'price',
         'min_people',
     ];
+
+    protected $casts = [
+        'available_dates' => 'array',
+    ];
+    
 }
